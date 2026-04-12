@@ -1,0 +1,22 @@
+@page "/404"
+@{
+    ViewData["Title"] = "404";
+}
+
+<div class="bg-swamp-900 relative h-[700px]">
+    <div class="absolute inset-0 z-0">
+        <img src="/images/shrek.jpg" alt="What are you doing in my swamp" class="w-full h-full object-cover object-center" />
+    </div>
+
+    <div class="relative z-10 h-full flex items-center">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h1 class="text-4xl font-extrabold text-white sm:text-5xl md:text-6xl">404 Not Found</h1>
+            <p class="mt-4 max-w-md mx-auto text-lg text-swamp-300 sm:text-xl md:mt-6 md:max-w-2xl">
+                What are you doing in my swamp!?
+            </p>
+            <a href="/" class="inline-block mt-8 bg-swamp-500 text-white px-8 py-3 rounded-full hover:bg-swamp-600">
+                Back to Home
+            </a>
+        </div>
+    </div>
+</div>
