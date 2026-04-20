@@ -1,10 +1,10 @@
 using System.Net;
 using System.Net.Mail;
-using Lab5.Areas.Communication.Models;
+using Lab5.Models;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace Lab5.Areas.Communication.Services;
+namespace Lab5.Services;
 
 public class GmailEmailNotificationService : IEmailNotificationService
 {

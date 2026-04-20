@@ -1,0 +1,28 @@
+@model IReadOnlyList<TrendingPondViewModel>
+
+<section class="bg-white rounded-xl shadow-sm p-6">
+    <h3 class="text-lg font-semibold text-swamp-900 mb-4">Trending Ponds</h3>
+    @if (Model.Count == 0)
+    {
+        <p class="text-sm text-swamp-500">No fresh pond activity yet.</p>
+    }
+    else
+    {
+        <ul class="space-y-3">
+            @foreach (var pond in Model)
+            {
+                <li>
+                    <a href="/ponds/@pond.TagName" class="flex items-center space-x-3 group hover:bg-swamp-50 rounded-lg p-2">
+                        <div class="w-8 h-8 bg-swamp-100 rounded-lg flex items-center justify-center">
+                            <svg class="text-swamp-600" fill="currentColor" height="48px" width="48px" viewBox="-122.88 -122.88 757.76 757.76" stroke="currentColor" stroke-width="0.00512"><g><path d="M452.09,335.122c62.386-69.965,60.006-177.603,59.867-182.309c-0.255-8.712-7.161-15.767-15.864-16.21 c-2.307-0.116-34.685-1.557-74.997,6.427c-7.934-39.686-21.397-68.089-22.046-69.442c-3.695-7.715-12.621-11.393-20.681-8.529 c-1.409,0.502-30.793,11.089-64.301,33.391c-22.136-33.013-45.055-53.88-46.902-55.536c-6.353-5.7-15.98-5.7-22.333,0 c-1.847,1.658-24.767,22.523-46.902,55.536c-33.507-22.302-62.891-32.891-64.3-33.392c-8.061-2.866-16.983,0.815-20.681,8.529 c-0.649,1.353-14.111,29.756-22.046,69.442c-40.312-7.986-72.689-6.543-74.996-6.426c-8.706,0.441-15.61,7.497-15.865,16.21 c-0.138,4.706-2.518,112.345,59.867,182.309c-25.548,10.116-54.712,27.242-54.712,54.639c0,26.751,27.147,48.071,80.688,63.368 c45.665,13.047,106.079,20.232,170.114,20.232c64.035,0,124.449-7.185,170.114-20.232c53.54-15.297,80.688-36.617,80.688-63.368 C506.802,362.378,477.675,345.252,452.09,335.122z"></path></g></svg>
+                        </div>
+                        <div>
+                            <h4 class="font-medium text-swamp-700 group-hover:text-swamp-600">#@pond.TagName</h4>
+                            <p class="text-xs text-swamp-500">@pond.RecentPosts posts</p>
+                        </div>
+                    </a>
+                </li>
+            }
+        </ul>
+    }
+</section>

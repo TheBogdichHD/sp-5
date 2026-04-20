@@ -1,4 +1,4 @@
-namespace Lab5.Areas.Communication.Services;
+namespace Lab5.Services;
 
 public class GmailSmtpOptions
 {

@@ -1,10 +1,10 @@
-@model ProfilePageViewModel
+@model PostDetailsPageViewModel
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Greenswamp Feed</title>
+    <title>Post - Greenswamp</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -14,42 +14,38 @@
 </head>
 <body class="bg-swamp-50">
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-    <div class="grid grid-cols-1 lg:grid-cols-4 gap-0 lg:divide-x sm:divide-y lg:h-[calc(100vb-4rem)]">
+    <div class="grid grid-cols-1 lg:grid-cols-4 gap-0 lg:divide-x lg:h-[calc(100vh-4rem)]">
         <div class="lg:col-span-1 bg-white">
             <div class="p-6 pb-0">
                 <div class="flex space-x-3">
-                    <img src="@(string.IsNullOrWhiteSpace(Model.AvatarUrl) ? "/images/green-toad-logo.svg" : Model.AvatarUrl)" alt="User" class="w-16 h-16 rounded-full">
-                    <div class="flex-1">
-                        <div class="flex items-center justify-between">
-                            <div class="space-y-1">
-                                <div class="flex items-center space-x-2">
-                                    <h4 class="font-semibold text-swamp-900">@Model.DisplayName</h4>
-                                    <div class="relative">
-                                        <button id="settingsButton" class="text-swamp-700 hover:text-swamp-700 transition-colors" aria-label="Profile settings" aria-haspopup="true">
-                                            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor" stroke="none" stroke-linecap="round" stroke-linejoin="round"><g><circle cx="18" cy="12" r="1.5" transform="rotate(90 18 12)"></circle><circle cx="12" cy="12" r="1.5" transform="rotate(90 12 12)"></circle><circle cx="6" cy="12" r="1.5" transform="rotate(90 6 12)"></circle></g></svg>
+                    <img src="@(string.IsNullOrWhiteSpace(Model.Post.AuthorAvatarUrl) ? "/images/green-toad-logo.svg" : Model.Post.AuthorAvatarUrl)" alt="User" class="w-16 h-16 rounded-full">
+                    <div class="space-y-1">
+                        <div class="flex items-center space-x-2">
+                            <h4 class="font-semibold text-swamp-900">@Model.Post.AuthorDisplayName</h4>
+                            <div class="relative">
+                                <button id="settingsButton" class="text-swamp-700 hover:text-swamp-700 transition-colors" aria-label="Profile settings" aria-haspopup="true">
+                                    <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor" stroke="none" stroke-linecap="round" stroke-linejoin="round"><g><circle cx="18" cy="12" r="1.5" transform="rotate(90 18 12)"></circle><circle cx="12" cy="12" r="1.5" transform="rotate(90 12 12)"></circle><circle cx="6" cy="12" r="1.5" transform="rotate(90 6 12)"></circle></g></svg>
+                                </button>
+                                <div id="settingsDropdown" class="absolute hidden right-0 mt-2 w-48 bg-white rounded-lg shadow-xl border border-swamp-100 z-50">
+                                    <div class="py-1">
+                                        <button class="w-full px-4 py-2 text-sm text-swamp-700 hover:bg-swamp-50 flex items-center space-x-2">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065"></path>
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0"></path>
+                                            </svg>
+                                            <span>Settings</span>
                                         </button>
-                                        <div id="settingsDropdown" class="absolute hidden right-0 mt-2 w-48 bg-white rounded-lg shadow-xl border border-swamp-100 z-50">
-                                            <div class="py-1">
-                                                <button class="w-full px-4 py-2 text-sm text-swamp-700 hover:bg-swamp-50 flex items-center space-x-2">
-                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065"></path>
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0"></path>
-                                                    </svg>
-                                                    <span>Settings</span>
-                                                </button>
-                                                <button class="w-full px-4 py-2 text-sm text-swamp-700 hover:bg-swamp-50 flex items-center space-x-2">
-                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
-                                                    </svg>
-                                                    <span>Sign Out</span>
-                                                </button>
-                                            </div>
-                                        </div>
+                                        <button class="w-full px-4 py-2 text-sm text-swamp-700 hover:bg-swamp-50 flex items-center space-x-2">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+                                            </svg>
+                                            <span>Sign Out</span>
+                                        </button>
                                     </div>
                                 </div>
-                                <a href="/profile/@Model.Username" class="text-sm text-swamp-500 hover:text-swamp-700">@("@" + Model.Username)</a>
                             </div>
                         </div>
+                        <a href="/profile/@Model.Post.AuthorUsername" class="text-sm text-swamp-500 hover:text-swamp-700">@("@" + Model.Post.AuthorUsername)</a>
                     </div>
                 </div>
             </div>
@@ -72,93 +68,139 @@
                     <svg class="w-8 h-8" fill="currentColor" viewBox="-122.88 -122.88 757.76 757.76" stroke-width="0.0"><g><path d="M452.09,335.122c62.386-69.965,60.006-177.603,59.867-182.309c-0.255-8.712-7.161-15.767-15.864-16.21 c-2.307-0.116-34.685-1.557-74.997,6.427c-7.934-39.686-21.397-68.089-22.046-69.442c-3.695-7.715-12.621-11.393-20.681-8.529 c-1.409,0.502-30.793,11.089-64.301,33.391c-22.136-33.013-45.055-53.88-46.902-55.536c-6.353-5.7-15.98-5.7-22.333,0 c-1.847,1.658-24.767,22.523-46.902,55.536c-33.507-22.302-62.891-32.891-64.3-33.392c-8.061-2.866-16.983,0.815-20.681,8.529 c-0.649,1.353-14.111,29.756-22.046,69.442c-40.312-7.986-72.689-6.543-74.996-6.426c-8.706,0.441-15.61,7.497-15.865,16.21 c-0.138,4.706-2.518,112.345,59.867,182.309c-25.548,10.116-54.712,27.242-54.712,54.639c0,26.751,27.147,48.071,80.688,63.368 c45.665,13.047,106.079,20.232,170.114,20.232c64.035,0,124.449-7.185,170.114-20.232c53.54-15.297,80.688-36.617,80.688-63.368 C506.802,362.378,477.675,345.252,452.09,335.122z M478.058,170.096c-1.946,31.969-11.425,103.617-56.537,148.728 c-36.2,36.199-89.566,48.414-125.646,52.438c39.064-48.084,66.363-107.116,59.272-168.736 C398.199,176.455,451.645,171.071,478.058,170.096z M374.92,102.738c4.236,11.349,9.815,28.472,13.716,48.559 c-13.576,4.293-27.37,9.806-40.69,16.88c-4.406-14.561-10.245-28.283-16.784-40.922 C348.028,115.898,363.966,107.764,374.92,102.738z M256.021,79.056c35.584,38.182,66.859,90.846,66.859,143.503 c0,63.89-45.323,120.279-66.902,143.503c-21.587-23.163-66.859-79.39-66.859-143.503C189.12,170.1,220.169,117.642,256.021,79.056 z M137.081,102.738c10.957,5.028,26.895,13.161,43.758,24.516c-6.539,12.639-12.377,26.362-16.784,40.922 c-13.319-7.074-27.113-12.587-40.689-16.88C127.267,131.207,132.847,114.083,137.081,102.738z M33.942,170.07 c26.377,0.94,79.734,6.278,122.913,32.453c-7.089,61.584,20.174,120.616,59.271,168.739 c-36.08-4.024-89.446-16.237-125.645-52.438C45.355,273.698,35.883,202.016,33.942,170.07z M416.928,420.976 c-42.759,12.217-99.912,18.946-160.927,18.946c-61.015,0-118.167-6.728-160.928-18.946 c-46.066-13.162-56.434-27.299-56.434-31.214c0-3.733,9.353-16.619,49.518-29.148c45.956,33.345,113.973,48.174,167.843,45.886 c53.029,2.254,121.345-12.148,167.843-45.886c40.165,12.529,49.518,25.415,49.518,29.148 C473.362,393.676,462.995,407.814,416.928,420.976z"></path></g></svg>
                     <h3 class="text-lg font-semibold">Ponds</h3>
                 </a>
-                <ul class="p-1 space-y-3">
-                    @foreach (var pond in Model.TrendingPonds.Take(2))
-                    {
-                        <li class="p-1 hover:bg-swamp-50 rounded-lg"><a href="/ponds/@pond.TagName" class="flex items-center space-x-2"><span class="w-2 h-2 bg-swamp-400 rounded-full"></span><span class="text-swamp-700">#@pond.TagName</span></a></li>
-                    }
-                </ul>
             </div>
         </div>
 
-        <div class="lg:col-span-2 divide-y bg-white">
-            <div class="relative overflow-hidden">
-                <div class="h-48 bg-swamp-800 relative">
-                    <div class="absolute inset-0 bg-gradient-to-b from-swamp-600 to-swamp-200"></div>
-                    <div class="absolute -bottom-12 left-6 z-9">
-                        <div class="w-32 h-32 rounded-full border-4 border-swamp-600 bg-swamp-800 overflow-hidden shadow-xl">
-                            <img src="@(string.IsNullOrWhiteSpace(Model.AvatarUrl) ? "/images/green-toad-logo.svg" : Model.AvatarUrl)" class="w-full h-full object-cover" alt="Profile avatar">
+        <div class="lg:col-span-2 divide-y">
+            <div class="bg-white p-6 border-l-4 border-l-swamp-500">
+                <div class="flex items-start space-x-3">
+                    <img src="@(string.IsNullOrWhiteSpace(Model.Post.AuthorAvatarUrl) ? "/images/green-toad-logo.svg" : Model.Post.AuthorAvatarUrl)" alt="User" class="w-16 h-16 rounded-full">
+                    <div class="flex-1">
+                        <div class="flex items-center space-x-2">
+                            <h4 class="font-semibold text-swamp-900">@Model.Post.AuthorDisplayName</h4>
+                            <a href="/profile/@Model.Post.AuthorUsername" class="text-sm text-swamp-500 hover:text-swamp-700">@("@" + Model.Post.AuthorUsername)</a>
+                            <span class="text-swamp-500">·</span>
+                            <span class="text-sm text-swamp-500">@Model.Post.CreatedAgo</span>
+                        </div>
+                        <p class="mt-2 text-swamp-700">@Html.Raw(Model.Post.ContentHtml)</p>
+
+                        @if (!string.IsNullOrWhiteSpace(Model.Post.MediaUrl))
+                        {
+                            if (Model.Post.MediaType == "video")
+                            {
+                                <div class="mt-4 rounded-lg overflow-hidden"><video class="w-full aspect-video object-cover bg-slate-900" controls preload="metadata" poster="@Model.Post.ThumbnailUrl"><source src="@Model.Post.MediaUrl" type="video/mp4"></video></div>
+                            }
+                            else
+                            {
+                                <img class="mt-2 p-1 rounded-xl" src="@Model.Post.MediaUrl" alt="@(Model.Post.AltText ?? "post media")" />
+                            }
+                        }
+
+                        <div class="mt-4 flex items-center space-x-6 text-swamp-500">
+                            <span class="flex items-center space-x-2">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                                </svg>
+                                <span>@Model.Post.AnswersCount Answers</span>
+                            </span>
+                            <span class="flex items-center space-x-2">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                                </svg>
+                                <span>@Model.Post.ReribbsCount Reribbs</span>
+                            </span>
                         </div>
                     </div>
-                </div>
-
-                <div class="pt-20 pb-6 px-6">
-                    <div class="flex justify-between items-start">
-                        <div>
-                            <h1 class="text-2xl font-bold text-swamp-900">@Model.DisplayName</h1>
-                            <p class="text-swamp-500">@("@" + Model.Username)</p>
-                        </div>
-                        <button class="px-4 p-2 flex items-center space-x-1 bg-swamp-500 text-white rounded-full hover:bg-swamp-600 transition-all">
-                            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><g><path fill-rule="evenodd" clip-rule="evenodd" d="M12.0002 8C9.79111 8 8.00024 9.79086 8.00024 12C8.00024 14.2091 9.79111 16 12.0002 16C14.2094 16 16.0002 14.2091 16.0002 12C16.0002 9.79086 14.2094 8 12.0002 8ZM10.0002 12C10.0002 10.8954 10.8957 10 12.0002 10C13.1048 10 14.0002 10.8954 14.0002 12C14.0002 13.1046 13.1048 14 12.0002 14C10.8957 14 10.0002 13.1046 10.0002 12Z"></path><path fill-rule="evenodd" clip-rule="evenodd" d="M11.2867 0.5C9.88583 0.5 8.6461 1.46745 8.37171 2.85605L8.29264 3.25622C8.10489 4.20638 7.06195 4.83059 6.04511 4.48813L5.64825 4.35447C4.32246 3.90796 2.83873 4.42968 2.11836 5.63933L1.40492 6.83735C0.67773 8.05846 0.954349 9.60487 2.03927 10.5142L2.35714 10.7806C3.12939 11.4279 3.12939 12.5721 2.35714 13.2194L2.03927 13.4858C0.954349 14.3951 0.67773 15.9415 1.40492 17.1626L2.11833 18.3606C2.83872 19.5703 4.3225 20.092 5.64831 19.6455L6.04506 19.5118C7.06191 19.1693 8.1049 19.7935 8.29264 20.7437L8.37172 21.1439C8.6461 22.5325 9.88584 23.5 11.2867 23.5H12.7136C14.1146 23.5 15.3543 22.5325 15.6287 21.1438L15.7077 20.7438C15.8954 19.7936 16.9384 19.1693 17.9553 19.5118L18.3521 19.6455C19.6779 20.092 21.1617 19.5703 21.8821 18.3606L22.5955 17.1627C23.3227 15.9416 23.046 14.3951 21.9611 13.4858L21.6432 13.2194C20.8709 12.5722 20.8709 11.4278 21.6432 10.7806L21.9611 10.5142C23.046 9.60489 23.3227 8.05845 22.5955 6.83732L21.8821 5.63932C21.1617 4.42968 19.678 3.90795 18.3522 4.35444L17.9552 4.48814C16.9384 4.83059 15.8954 4.20634 15.7077 3.25617L15.6287 2.85616C15.3543 1.46751 14.1146 0.5 12.7136 0.5H11.2867ZM10.3338 3.24375C10.4149 2.83334 10.7983 2.5 11.2867 2.5H12.7136C13.2021 2.5 13.5855 2.83336 13.6666 3.24378L13.7456 3.64379C14.1791 5.83811 16.4909 7.09167 18.5935 6.38353L18.9905 6.24984C19.4495 6.09527 19.9394 6.28595 20.1637 6.66264L20.8771 7.86064C21.0946 8.22587 21.0208 8.69271 20.6764 8.98135L20.3586 9.24773C18.6325 10.6943 18.6325 13.3057 20.3586 14.7523L20.6764 15.0186C21.0208 15.3073 21.0946 15.7741 20.8771 16.1394L20.1637 17.3373C19.9394 17.714 19.4495 17.9047 18.9905 17.7501L18.5936 17.6164C16.4909 16.9082 14.1791 18.1618 13.7456 20.3562L13.6666 20.7562C13.5855 21.1666 13.2021 21.5 12.7136 21.5H11.2867C10.7983 21.5 10.4149 21.1667 10.3338 20.7562L10.2547 20.356C9.82113 18.1617 7.50931 16.9082 5.40665 17.6165L5.0099 17.7501C4.55092 17.9047 4.06104 17.714 3.83671 17.3373L3.1233 16.1393C2.9058 15.7741 2.97959 15.3073 3.32398 15.0186L3.64185 14.7522C5.36782 13.3056 5.36781 10.6944 3.64185 9.24779L3.32398 8.98137C2.97959 8.69273 2.9058 8.2259 3.1233 7.86067L3.83674 6.66266C4.06106 6.28596 4.55093 6.09528 5.0099 6.24986L5.40676 6.38352C7.50938 7.09166 9.82112 5.83819 10.2547 3.64392L10.3338 3.24375Z"></path></g></svg>
-                            <span>Settings</span>
-                        </button>
-                    </div>
-                    <div class="mt-4 flex gap-6 text-swamp-700"><div><span class="text-swamp-400 font-medium">120</span> Following</div><div><span class="text-swamp-400 font-medium">58</span> Followers</div></div>
-                    <p class="mt-4 text-swamp-700 leading-relaxed">@(string.IsNullOrWhiteSpace(Model.Bio) ? "Greenswamp profile" : Model.Bio)</p>
-                </div>
-
-                <div class="flex gap-4 items-center">
-                    <button class="p-2 pl-4 pr-4 text-swamp-700 border-b-2 border-swamp-500">Ribbits</button>
-                    <button class="p-2 pl-4 pr-4 text-swamp-500 hover:text-swamp-700">Ponds</button>
-                    <button class="p-2 pl-4 pr-4 text-swamp-500 hover:text-swamp-700">Replies</button>
-                    <button class="p-2 pl-4 pr-4 text-swamp-500 hover:text-swamp-700">Media</button>
                 </div>
             </div>
 
-            <div class="space-y-6">
-                @foreach (var post in Model.Posts)
-                {
-                    <div class="bg-white shadow-sm p-6">
-                        <div class="flex items-start space-x-3">
-                            <img src="@(string.IsNullOrWhiteSpace(post.AuthorAvatarUrl) ? "/images/green-toad-logo.svg" : post.AuthorAvatarUrl)" alt="User" class="w-16 h-16 rounded-full">
-                            <div class="flex-1">
-                                <div class="flex items-center space-x-2">
-                                    <h4 class="font-semibold text-swamp-900">@post.AuthorDisplayName</h4>
-                                    <a href="/profile/@post.AuthorUsername" class="text-sm text-swamp-500 hover:text-swamp-700">@("@" + post.AuthorUsername)</a>
-                                    <span class="text-swamp-500">·</span>
-                                    <a href="/feed/post/@post.PostId" class="text-sm text-swamp-500 hover:text-swamp-700">@post.CreatedAgo</a>
-                                </div>
-                                <p class="mt-2 text-swamp-700">@Html.Raw(post.ContentHtml)</p>
-
-                                @if (!string.IsNullOrWhiteSpace(post.MediaUrl))
-                                {
-                                    if (post.MediaType == "video")
-                                    {
-                                        <div class="mt-4 rounded-lg overflow-hidden"><video class="w-full aspect-video object-cover bg-slate-900" controls preload="metadata" poster="@post.ThumbnailUrl"><source src="@post.MediaUrl" type="video/mp4"></video></div>
-                                    }
-                                    else
-                                    {
-                                        <img class="mt-2 p-1 rounded-xl" src="@post.MediaUrl" alt="@(post.AltText ?? "post media")" />
-                                    }
-                                }
-
-                                <div class="mt-4 flex items-center space-x-6 text-swamp-500">
-                                    <a href="/feed/post/@post.PostId" class="flex items-center space-x-2 hover:text-swamp-600">
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
-                                        </svg>
-                                        <span>@post.AnswersCount Answers</span>
-                                    </a>
-                                    <span class="flex items-center space-x-2">
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
-                                        </svg>
-                                        <span>@post.ReribbsCount Reribbs</span>
-                                    </span>
-                                </div>
-                            </div>
+            <div class="bg-swamp-50 p-6 sticky top-0 z-0 border-b border-swamp-200">
+                <div class="flex items-start space-x-3">
+                    <img src="/images/green-toad-logo.svg" alt="You" class="w-12 h-12 rounded-full">
+                    <div class="flex-1">
+                        <textarea class="w-full p-4 border border-swamp-200 rounded-xl focus:ring-2 focus:ring-swamp-400 focus:border-transparent placeholder-swamp-500" rows="2" placeholder="Croak your reply..."></textarea>
+                        <div class="mt-4 flex justify-between items-center">
+                            <button class="p-2 text-swamp-500 hover:bg-swamp-100 rounded-full">🐸 Add Frogmoji</button>
+                            <button class="bg-swamp-500 text-white px-6 py-2 rounded-full hover:bg-swamp-600">Send Answer</button>
                         </div>
                     </div>
+                </div>
+            </div>
+
+            <div class="divide-y divide-swamp-100">
+                @if (Model.Replies.Count == 0)
+                {
+                    <div class="bg-white p-6 text-swamp-600">No replies yet.</div>
+                }
+                else
+                {
+                    var topLevelReplies = Model.Replies
+                        .Where(x => x.ParentPostId == Model.Post.PostId)
+                        .OrderBy(x => x.CreatedAt)
+                        .ToList();
+
+                    foreach (var reply in topLevelReplies)
+                    {
+                        <div class="bg-white pl-6 py-4 relative">
+                            <div class="absolute left-0 top-0 bottom-0 w-1 bg-swamp-500"></div>
+                            <div class="flex items-start space-x-3">
+                                <img src="@(string.IsNullOrWhiteSpace(reply.AuthorAvatarUrl) ? "/images/green-toad-logo.svg" : reply.AuthorAvatarUrl)" alt="User" class="w-12 h-12 rounded-full">
+                                <div class="flex-1">
+                                    <div class="flex items-center space-x-2">
+                                        <h4 class="font-semibold text-swamp-900">@reply.AuthorDisplayName</h4>
+                                        <a href="/profile/@reply.AuthorUsername" class="text-sm text-swamp-500 hover:text-swamp-700">@("@" + reply.AuthorUsername)</a>
+                                        <span class="text-swamp-500">·</span>
+                                        <a href="/feed/post/@reply.PostId" class="text-sm text-swamp-500 hover:text-swamp-700">@reply.CreatedAgo</a>
+                                    </div>
+                                    <p class="mt-2 text-swamp-700">@Html.Raw(reply.ContentHtml)</p>
+                                    <div class="mt-3 flex items-center space-x-4 text-swamp-500">
+                                        <button class="flex items-center space-x-2 hover:text-swamp-600">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                                            </svg>
+                                            <span>Answer</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            @{
+                                var childReplies = Model.Replies
+                                    .Where(x => x.ParentPostId == reply.PostId)
+                                    .OrderBy(x => x.CreatedAt)
+                                    .ToList();
+                            }
+
+                            @foreach (var child in childReplies)
+                            {
+                                <div class="pl-4 relative mt-3">
+                                    <div class="bg-white p-4 pl-6 relative">
+                                        <div class="absolute left-0 top-0 bottom-0 w-1 bg-swamp-300"></div>
+                                        <div class="flex items-start space-x-3">
+                                            <img src="@(string.IsNullOrWhiteSpace(child.AuthorAvatarUrl) ? "/images/green-toad-logo.svg" : child.AuthorAvatarUrl)" alt="User" class="w-10 h-10 rounded-full">
+                                            <div class="flex-1">
+                                                <div class="flex items-center space-x-2">
+                                                    <h4 class="font-medium text-swamp-900">@child.AuthorDisplayName</h4>
+                                                    <a href="/profile/@child.AuthorUsername" class="text-xs text-swamp-500 hover:text-swamp-700">@("@" + child.AuthorUsername)</a>
+                                                    <span class="text-swamp-500">·</span>
+                                                    <a href="/feed/post/@child.PostId" class="text-xs text-swamp-500 hover:text-swamp-700">@child.CreatedAgo</a>
+                                                </div>
+                                                <p class="mt-1 text-sm text-swamp-700">@Html.Raw(child.ContentHtml)</p>
+                                                <div class="mt-3 flex items-center space-x-4 text-swamp-500">
+                                                    <button class="flex items-center space-x-2 hover:text-swamp-600">
+                                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                                                        </svg>
+                                                        <span>Answer</span>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
                 }
             </div>
         </div>
@@ -168,7 +210,7 @@
                 <div class="relative">
                     <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                         <svg class="w-5 h-5 text-swamp-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                         </svg>
                     </div>
                     <input type="text" placeholder="Search" class="w-full pl-10 pr-4 py-2 bg-swamp-100 dark:bg-swamp-900 rounded-full border-none focus:ring-2 focus:ring-swamp-400 focus-visible:ring-swamp-400 placeholder:text-swamp-400">

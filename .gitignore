@@ -1,14 +1,8 @@
-.vscode/
+*.vscode
 
-# Build artifacts
-**/bin/
-**/obj/
+*bin
+*obj
 
-# Local runtime artifacts
-logs/
-Data/*.db
-Data/*.db-shm
-Data/*.db-wal
-
-# Local environment
 .env
+Data/*.db
+Data/*.db-*

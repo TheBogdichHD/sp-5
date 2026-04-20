@@ -1,8 +1,8 @@
 using System.Globalization;
 using CsvHelper;
-using Lab5.Areas.Communication.Models;
+using Lab5.Models;
 
-namespace Lab5.Areas.Communication.Services;
+namespace Lab5.Services;
 
 public class CsvStorageService : ICsvStorageService
 {

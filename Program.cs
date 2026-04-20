@@ -1,27 +1,21 @@
 using System.Collections.Concurrent;
-using Lab5.Areas.Communication.Services;
-using Lab5.Areas.Feed.Data;
+using Lab5.Areas.Feed.Database;
 using Lab5.Areas.Feed.Services;
+using Lab5.Services;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Rewrite;
 
 LoadDotEnv(Path.Combine(Directory.GetCurrentDirectory(), ".env"));
 
 var builder = WebApplication.CreateBuilder(args);
-builder.WebHost.UseUrls("http://localhost:5000");
 
-builder.Services
-    .AddControllersWithViews()
-    .AddRazorOptions(options =>
-    {
-        options.AreaViewLocationFormats.Add("/Areas/{2}/Views/{1}/{0}.cshtml");
-    });
+builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
-builder.Services.AddDbContext<GreenswampContext>(options =>
-    options.UseSqlite(builder.Configuration.GetConnectionString("SQLiteConnection")
-        ?? "Data Source=Data/greenswamp.db"));
-builder.Services.AddScoped<IFeedQueryService, FeedQueryService>();
 builder.Services.AddSingleton<ICsvStorageService, CsvStorageService>();
+builder.Services.AddDbContext<GreenswampContext>(options =>
+    options.UseSqlite(builder.Configuration.GetConnectionString("FeedDb")));
+builder.Services.AddScoped<IFeedQueryService, FeedQueryService>();
+builder.Services.AddScoped<IHashtagFormatter, HashtagFormatter>();
+builder.Services.AddScoped<FeedDatabaseInitializer>();
 builder.Services.Configure<GmailSmtpOptions>(options =>
 {
     options.Host = builder.Configuration["GmailSmtp:Host"] ?? "smtp.gmail.com";
@@ -38,11 +32,14 @@ builder.Services.Configure<GmailSmtpOptions>(options =>
 builder.Services.AddTransient<IEmailNotificationService, GmailEmailNotificationService>();
 
 var app = builder.Build();
-await FeedDatabaseInitializer.InitializeAsync(app);
 
-var logsDirectory = Path.Combine(app.Environment.ContentRootPath, "logs");
-Directory.CreateDirectory(logsDirectory);
-var logFilePath = Path.Combine(logsDirectory, "requests.log");
+using (var scope = app.Services.CreateScope())
+{
+    var initializer = scope.ServiceProvider.GetRequiredService<FeedDatabaseInitializer>();
+    await initializer.InitializeAsync();
+}
+
+var logFilePath = Path.Combine(app.Environment.ContentRootPath, "requests.log");
 var logLocks = new ConcurrentDictionary<string, object>();
 
 app.Use(async (context, next) =>
@@ -65,24 +62,45 @@ app.Use(async (context, next) =>
 
 app.UseStatusCodePagesWithReExecute("/404");
 
-var rewriteOptions = new RewriteOptions()
-    .AddRewrite("^index\\.html$", "/", skipRemainingRules: true)
-    .AddRedirect("^(.+)\\.html$", "$1", statusCode: StatusCodes.Status301MovedPermanently);
-
-app.UseRewriter(rewriteOptions);
-
 app.UseStaticFiles();
 app.UseRouting();
 
 app.MapRazorPages();
+app.MapControllers();
 app.MapAreaControllerRoute(
     name: "feed_area",
     areaName: "Feed",
-    pattern: "Feed/{controller=Feed}/{action=Index}/{id?}");
-app.MapControllerRoute(
-    name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
-app.MapControllers();
+    pattern: "{area:exists}/{controller=Feed}/{action=Index}/{id?}");
+
+app.MapGet("/index.html", (HttpContext context) =>
+{
+    context.Response.Redirect("/", permanent: true);
+    return Task.CompletedTask;
+});
+
+app.MapGet("/about.html", (HttpContext context) =>
+{
+    context.Response.Redirect("/about", permanent: true);
+    return Task.CompletedTask;
+});
+
+app.MapGet("/contact.html", (HttpContext context) =>
+{
+    context.Response.Redirect("/contact", permanent: true);
+    return Task.CompletedTask;
+});
+
+app.MapGet("/privacy.html", (HttpContext context) =>
+{
+    context.Response.Redirect("/privacy", permanent: true);
+    return Task.CompletedTask;
+});
+
+app.MapGet("/tos.html", (HttpContext context) =>
+{
+    context.Response.Redirect("/tos", permanent: true);
+    return Task.CompletedTask;
+});
 
 app.Run();
 

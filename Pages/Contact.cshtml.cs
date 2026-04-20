@@ -1,9 +1,9 @@
-using Lab5.Areas.Communication.Models;
-using Lab5.Areas.Communication.Services;
+using Lab5.Models;
+using Lab5.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
-namespace Lab5.Areas.Site.Pages;
+namespace Lab5.Pages;
 
 public class ContactModel : PageModel
 {

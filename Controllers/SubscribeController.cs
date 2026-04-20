@@ -1,10 +1,9 @@
-using Lab5.Areas.Communication.Models;
-using Lab5.Areas.Communication.Services;
+using Lab5.Models;
+using Lab5.Services;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Lab5.Areas.Communication.Controllers;
+namespace Lab5.Controllers;
 
-[Area("Communication")]
 [Route("subscribe")]
 public class SubscribeController : Controller
 {

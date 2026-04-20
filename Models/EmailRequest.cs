@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace Lab5.Areas.Communication.Models;
+namespace Lab5.Models;
 
 public class EmailRequest
 {

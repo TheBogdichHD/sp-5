@@ -1,29 +1,30 @@
-using Lab5.Areas.Feed.Data;
+using Lab5.Areas.Feed.Database;
+using Lab5.Areas.Feed.Models;
 using Lab5.Areas.Feed.ViewModels;
 using Microsoft.EntityFrameworkCore;
 
 namespace Lab5.Areas.Feed.Services;
 
-public sealed class FeedQueryService(GreenswampContext context) : IFeedQueryService
+public class FeedQueryService(GreenswampContext db, IHashtagFormatter hashtagFormatter) : IFeedQueryService
 {
-    public async Task<FeedPageViewModel> GetFeedAsync(string? tag, CancellationToken cancellationToken = default)
+    public async Task<FeedPageViewModel> GetFeedAsync(CancellationToken cancellationToken = default)
     {
-        var posts = await BuildPostCardsQuery(tag)
+        var posts = await LoadPostsBaseQuery()
+            .Where(x => x.ParentPostId == null)
             .OrderByDescending(x => x.CreatedAt)
             .Take(100)
             .ToListAsync(cancellationToken);
 
         return new FeedPageViewModel
         {
-            CurrentTag = string.IsNullOrWhiteSpace(tag) ? null : tag,
-            Posts = posts,
+            Posts = posts.Select(MapPost).ToList(),
             TrendingPonds = await GetTrendingPondsAsync(cancellationToken)
         };
     }
 
     public async Task<ProfilePageViewModel?> GetProfileAsync(string username, CancellationToken cancellationToken = default)
     {
-        var user = await context.Users
+        var user = await db.Users
             .AsNoTracking()
             .FirstOrDefaultAsync(x => x.Username == username && x.IsActive, cancellationToken);
 
@@ -32,10 +33,9 @@ public sealed class FeedQueryService(GreenswampContext context) : IFeedQueryServ
             return null;
         }
 
-        var posts = await BuildPostCardsQuery(null)
-            .Where(x => x.Username == username)
+        var posts = await LoadPostsBaseQuery()
+            .Where(x => x.UserId == user.UserId)
             .OrderByDescending(x => x.CreatedAt)
-            .Take(100)
             .ToListAsync(cancellationToken);
 
         return new ProfilePageViewModel
@@ -44,16 +44,15 @@ public sealed class FeedQueryService(GreenswampContext context) : IFeedQueryServ
             DisplayName = user.DisplayName,
             AvatarUrl = user.AvatarUrl,
             Bio = user.Bio,
-            Followers = 58,
-            Following = 120,
-            Posts = posts,
+            CreatedAt = user.CreatedAt,
+            Posts = posts.Select(MapPost).ToList(),
             TrendingPonds = await GetTrendingPondsAsync(cancellationToken)
         };
     }
 
-    public async Task<PostDetailsPageViewModel?> GetPostAsync(int postId, CancellationToken cancellationToken = default)
+    public async Task<PostDetailsPageViewModel?> GetPostDetailsAsync(long postId, CancellationToken cancellationToken = default)
     {
-        var post = await BuildPostCardsQuery(null)
+        var post = await LoadPostsBaseQuery()
             .FirstOrDefaultAsync(x => x.PostId == postId, cancellationToken);
 
         if (post is null)
@@ -61,103 +60,155 @@ public sealed class FeedQueryService(GreenswampContext context) : IFeedQueryServ
             return null;
         }
 
-        var answers = await context.Interactions
-            .AsNoTracking()
-            .Where(x => x.PostId == postId && x.InteractionType == "comment" && x.User.IsActive)
+        var candidateReplies = await LoadPostsBaseQuery()
+            .Where(x => x.ParentPostId != null)
             .OrderBy(x => x.CreatedAt)
-            .Select(x => new PostAnswerViewModel
-            {
-                Username = x.User.Username,
-                DisplayName = x.User.DisplayName,
-                AvatarUrl = x.User.AvatarUrl,
-                Content = x.Content ?? string.Empty,
-                CreatedAt = x.CreatedAt
-            })
             .ToListAsync(cancellationToken);
+
+        var repliesByParent = candidateReplies
+            .GroupBy(x => x.ParentPostId!.Value)
+            .ToDictionary(x => x.Key, x => x.ToList());
+
+        var replies = new List<Post>();
+        var visited = new HashSet<long>();
+        var queue = new Queue<long>();
+        queue.Enqueue(postId);
+
+        while (queue.Count > 0)
+        {
+            var parentId = queue.Dequeue();
+            if (!repliesByParent.TryGetValue(parentId, out var children))
+            {
+                continue;
+            }
+
+            foreach (var child in children)
+            {
+                if (!visited.Add(child.PostId))
+                {
+                    continue;
+                }
+
+                replies.Add(child);
+                queue.Enqueue(child.PostId);
+            }
+        }
 
         return new PostDetailsPageViewModel
         {
-            Post = post,
-            Answers = answers,
+            Post = MapPost(post),
+            Replies = replies.Select(MapPost).ToList(),
             TrendingPonds = await GetTrendingPondsAsync(cancellationToken)
         };
     }
 
-    private IQueryable<PostCardViewModel> BuildPostCardsQuery(string? tag)
+    public async Task<PondPageViewModel?> GetPondAsync(string tag, CancellationToken cancellationToken = default)
     {
-        var posts = context.Posts
-            .AsNoTracking()
-            .Where(x => x.User.IsActive);
-
-        if (!string.IsNullOrWhiteSpace(tag))
+        var normalizedTag = tag.Trim();
+        if (string.IsNullOrWhiteSpace(normalizedTag))
         {
-            posts = posts.Where(x => x.PostTags.Any(pt => pt.Tag.TagName == tag));
+            return null;
         }
 
-        return posts.Select(x => new PostCardViewModel
+        var tagEntity = await db.Tags
+            .AsNoTracking()
+            .FirstOrDefaultAsync(x => x.TagName == normalizedTag, cancellationToken);
+
+        if (tagEntity is null)
         {
-            PostId = x.PostId,
-            Username = x.User.Username,
-            DisplayName = x.User.DisplayName,
-            AvatarUrl = x.User.AvatarUrl,
-            Content = x.Content,
-            CreatedAt = x.CreatedAt,
-            PostType = x.PostType,
-            MediaUrl = x.MediaUrl,
-            MediaType = x.MediaType,
-            AltText = x.AltText,
-            ThumbnailUrl = x.ThumbnailUrl,
-            IsEvent = x.Event != null,
-            EventTime = x.Event != null ? x.Event.EventTime : null,
-            EventLocation = x.Event != null ? x.Event.Location : null,
-            EventHostOrg = x.Event != null ? x.Event.HostOrg : null,
-            EventRsvpCount = x.Event != null ? x.Event.RsvpCount : null,
-            Tags = x.PostTags
-                .OrderBy(pt => pt.Tag.TagName)
-                .Select(pt => pt.Tag.TagName)
-                .ToList(),
-            Interactions = new InteractionSummaryViewModel
-            {
-                Comments = x.Interactions.Count(i => i.InteractionType == "comment"),
-                Reribbs = x.Interactions.Count(i => i.InteractionType == "reribb"),
-                Likes = x.Interactions.Count(i => i.InteractionType == "like"),
-                Rsvps = x.Interactions.Count(i => i.InteractionType == "rsvp")
-            }
-        });
+            return null;
+        }
+
+        var posts = await LoadPostsBaseQuery()
+            .Where(x => x.ParentPostId == null)
+            .Where(x => x.PostTags.Any(pt => pt.Tag.TagName == normalizedTag))
+            .OrderByDescending(x => x.CreatedAt)
+            .ToListAsync(cancellationToken);
+
+        return new PondPageViewModel
+        {
+            TagName = tagEntity.TagName,
+            Posts = posts.Select(MapPost).ToList(),
+            TrendingPonds = await GetTrendingPondsAsync(cancellationToken)
+        };
     }
 
-    private async Task<IReadOnlyList<TrendingPondItemViewModel>> GetTrendingPondsAsync(CancellationToken cancellationToken)
+    private IQueryable<Post> LoadPostsBaseQuery()
     {
-        var since = DateTime.UtcNow.AddDays(-1);
-
-        var recent = await context.PostTags
+        return db.Posts
             .AsNoTracking()
-            .Where(x => x.Post.CreatedAt >= since)
-            .GroupBy(x => x.Tag.TagName)
-            .Select(g => new TrendingPondItemViewModel
-            {
-                TagName = g.Key,
-                RecentPosts = g.Count()
-            })
-            .OrderByDescending(x => x.RecentPosts)
-            .Take(10)
-            .ToListAsync(cancellationToken);
+            .Include(x => x.User)
+            .Include(x => x.Event)
+            .Include(x => x.Interactions)
+            .Include(x => x.PostTags)
+                .ThenInclude(x => x.Tag);
+    }
 
-        if (recent.Count > 0)
+    private async Task<IReadOnlyList<TrendingPondViewModel>> GetTrendingPondsAsync(CancellationToken cancellationToken)
+    {
+        var cutoff = DateTime.UtcNow.AddDays(-1);
+        return await db.PostTags
+            .AsNoTracking()
+            .Where(x => x.Post.CreatedAt >= cutoff)
+            .Where(x => x.Post.ParentPostId == null)
+            .GroupBy(x => x.Tag.TagName)
+            .OrderByDescending(x => x.Count())
+            .Take(10)
+            .Select(x => new TrendingPondViewModel
+            {
+                TagName = x.Key,
+                RecentPosts = x.LongCount()
+            })
+            .ToListAsync(cancellationToken);
+    }
+
+    private PostCardViewModel MapPost(Post post)
+    {
+        return new PostCardViewModel
         {
-            return recent;
+            PostId = post.PostId,
+            ParentPostId = post.ParentPostId,
+            AuthorUsername = post.User.Username,
+            AuthorDisplayName = post.User.DisplayName,
+            AuthorAvatarUrl = post.User.AvatarUrl,
+            ContentHtml = hashtagFormatter.Format(post.Content),
+            CreatedAt = post.CreatedAt,
+            CreatedAgo = ToTimeAgo(post.CreatedAt),
+            PostType = post.PostType,
+            MediaUrl = post.MediaUrl,
+            MediaType = post.MediaType,
+            ThumbnailUrl = post.ThumbnailUrl,
+            AltText = post.AltText,
+            EventTime = post.Event?.EventTime,
+            EventLocation = post.Event?.Location,
+            EventHostOrg = post.Event?.HostOrg,
+            EventRsvpCount = post.Event?.RsvpCount,
+            InteractionsCount = post.Interactions.Count,
+            AnswersCount = post.Interactions.Count(x => x.InteractionType == "comment"),
+            ReribbsCount = post.Interactions.Count(x => x.InteractionType == "reribb"),
+            Tags = post.PostTags.Select(x => x.Tag.TagName).Distinct().OrderBy(x => x).ToList()
+        };
+    }
+
+    private static string ToTimeAgo(DateTime createdAt)
+    {
+        var delta = DateTime.UtcNow - createdAt;
+
+        if (delta.TotalMinutes < 1)
+        {
+            return "now";
         }
 
-        return await context.Tags
-            .AsNoTracking()
-            .OrderByDescending(x => x.UsageCount)
-            .ThenBy(x => x.TagName)
-            .Select(x => new TrendingPondItemViewModel
-            {
-                TagName = x.TagName,
-                RecentPosts = x.UsageCount
-            })
-            .Take(10)
-            .ToListAsync(cancellationToken);
+        if (delta.TotalHours < 1)
+        {
+            return $"{Math.Max(1, (int)delta.TotalMinutes)}m";
+        }
+
+        if (delta.TotalDays < 1)
+        {
+            return $"{Math.Max(1, (int)delta.TotalHours)}h";
+        }
+
+        return $"{Math.Max(1, (int)delta.TotalDays)}d";
     }
 }
